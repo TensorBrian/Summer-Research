@@ -1,4 +1,4 @@
-# This script demonstrates how to use MERAKit.jl to find an approximation to the ground
+# This script demonstrates how to use MERAKit.jl to find an approximation to the ground.
 # state of the critical Ising model.
 using Random
 using LinearAlgebra
