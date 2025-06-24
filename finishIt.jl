@@ -10,30 +10,7 @@ using MERAKit
 # qualified as DemoTools.whatever.
 include("demo_tools.jl")
 using .DemoTools
-function classical_ising(β::Number; h=0)
-    function σ(i::Int64)
-        return 2i - 3
-    end
 
-    T_array = Float64[exp(β * (σ(i)σ(j) + σ(j)σ(l) + σ(l)σ(k) + σ(k)σ(i)) +
-                          h / 2 * β * (σ(i) + σ(j) + σ(k) + σ(l)))
-                      for i in 1:2, j in 1:2, k in 1:2, l in 1:2]
-
-    T = TensorMap(T_array, ℝ^2 ⊗ ℝ^2 ← ℝ^2 ⊗ ℝ^2)
-
-    return T
-end
-function classical_ising_symmetric(β)
-    x = cosh(β)
-    y = sinh(β)
-
-    S = ℤ₂Space(0 => 1, 1 => 1)
-    T = zeros(Float64, S ⊗ S ← S ⊗ S)
-    block(T, Irrep[ℤ₂](0)) .= [2x^2 2x*y; 2x*y 2y^2]
-    block(T, Irrep[ℤ₂](1)) .= [2x*y 2x*y; 2x*y 2x*y]
-
-    return T
-end
 
 function main()
     # Fix the random seed for the sake of reproducibility. MERA algorithms sometimes get
@@ -57,7 +34,7 @@ function main()
     
     # Choose the type of MERA to use.
     meratype = TernaryMERA
-    layers = 3
+    layers = 7
     # It's typically beneficial to gradually increase the bond dimension during the
     # optimisation. We do this here using the following steps: Each element of
     # `V_virtual_steps` is a vector space for the virtual indices of the MERA, and we run
@@ -74,7 +51,7 @@ function main()
     # probably be better for accuracy/speed, but using the same `V_virtual` everywhere works
     # well too, so for simplicity we stick to that.
     V_virtual_steps = (
-        Z2Space(0 => 1, 1 => 1),
+        Z2Space(0 => 2, 1 => 2),
         Z2Space(0 => 3, 1 => 3),
         Z2Space(0 => 4, 1 => 4),
     )
@@ -137,8 +114,10 @@ function main()
             method = method,
             verbosity = verbosity
         )
+    m = minimize_expectation(m ,h, pars; finalize! = finalize!)
+    DemoTools.store_mera(path, m)
 
-    return m.outputspace
+    return 0;
 end
 
 # Run the actual script. The whole thing is in a function mainly to avoid polluting the
