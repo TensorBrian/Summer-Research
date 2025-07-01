@@ -9,7 +9,7 @@ using Plots
 # DemoTools holds some utility functions needed by this script, for creating Hamiltonians
 # and storing and reading MERAs to/from disk. It exports nothing, so all calls need to be
 # qualified as DemoTools.whatever.
-include("demo_tools.jl")
+include("C:/Users/brian/OneDrive/GitHub/Summer-Research/demo_tools.jl")
 using .DemoTools
 
 path = "./newising.jld2"
@@ -237,6 +237,16 @@ function ascend_right_scalingData(Mera, l, howmany)
     return eigsolve(f, x0, howmany, :LM)
 end
 
+function H(n)
+    if n <1
+        return 0
+    elseif  n == 1
+        return 1
+    else 
+        return factorial(convert(Int32, n-1)) * H(convert(Int32, n-1))
+    end
+end
+
 print("\n")
 #print(expect(ZII, mera))
 
@@ -244,46 +254,36 @@ print("\n")
 print("\n")
 
 
-#print(op1)
+x = range(0, 10, length=11)
+x_pre = 2 .^ x
+x_pre = 4 .* x_pre
+x_out = 2 .* x_pre #convert.(Int64, x_pre)
 
-#print(space(mera.layers[1].isometry, 1))
-print("\n")
-x = range(1, 2, length=2)
-x_out = 2 .^ x
-x_out = 4 .* x
 
-y_out = []
-for i in 1:2
-    #temp = __2PBinaryCorrelation(mera, i, IIZ, IZI)
-    #push!(y_out, log(temp))
-end
-
-#plot(x, y_out)
-
-x = range(0, 32, length=33)
-x_out = 2 .^ x
-x_out = 4 .* x_out
-x_out = x_out
 z = []
 x = []
 y = []
 
-
-
+z_exact = 1.0 ./((4 .* (x_out .^ 2)) .- 1) .* 1.0/(pi^2)
+x_exact =  [0.25 * exp(0.25) * 2^(1.0/12) * 1.2824^(-3) ] .* (x_out .^ (-0.25) )#- x_out .^(-2.25) ./ 64) 
+y_exact = 1.0 ./(4 .* x_out .^ 2 .- 1) .* x_exact
+print(z_exact)
 #print(ascend_left(ZI_fused⊗II_fused⊗II_fused, mera.layers[1]))
 print("\n")
 print(num_translayers(mera))
 print("\n")
-op1 = IZ_fused ⊗ II_fused ⊗ II_fused
+op1 = ZI_fused ⊗ II_fused ⊗ II_fused
 op2 = II_fused ⊗ ZI_fused ⊗ II_fused
-op3 = IX_fused ⊗ II_fused ⊗ II_fused
+op3 = XI_fused ⊗ II_fused ⊗ II_fused
 op4 = II_fused ⊗ XI_fused ⊗ II_fused
 op5 = op1*op3
 op6 = op2*op4
-#input = __2PBinaryCorrelation(mera, 14, op1, op2)
-#print(input)
-adjust = .00010948
-for i in 0:32
+
+
+##Here, "adjust" shifts the C_z correlator before adding it to the z array. 
+##Since the GS we calculated is not necessarily exact, we can 
+adjust = .00#010#9
+for i in 0:10
     
     temp = __2PBinaryCorrelation(mera, i, op1, op2) - expect(op1, mera)^2 - adjust
     push!(z, temp)
@@ -294,11 +294,12 @@ for i in 0:32
 end
 #print(even_ascend_block(input, 6, mera.layers[1]))
 #y = log.(y)
-
-print(__2PBinaryCorrelation(mera, 1, op1, op2))
-print(z[33])
+print(y)
+#print(__2PBinaryCorrelation(mera, 1, op1, op2))
+#print(z[33])
 print("\n")
-plot(x_out, [x y z], label=["X-Correlation" "Y-Correlation" "Z-Correlation"])
+plot(x_out, [x_exact y_exact z_exact], label = ["Exact X-Correlation" "Exact Y-Correlation" "Exact Z-Correlation"])
+scatter!(x_out, [x y z], label=["Calculated X-Correlation" "Calculated Y-Correlation" "Calculated Z-Correlation"])
 plot!(xscale=:log10, yscale=:log10, minorgrid=true)
 xlims!(1e+0, 1e+10)
 ylims!(1e-8, 1e+0)
