@@ -264,8 +264,8 @@ z = []
 x = []
 y = []
 
-z_exact = 1.0 ./((4 .* (x_out .^ 2)) .- 1) .* 1.0/(pi^2)
-x_exact =  [0.25 * exp(0.25) * 2^(1.0/12) * 1.2824^(-3) ] .* (x_out .^ (-0.25) )#- x_out .^(-2.25) ./ 64) 
+z_exact = 4.0 ./((4 .* (x_out .^ 2)) .- 1) .* 1.0/(pi^2)
+x_exact =  [4*0.25 * exp(0.25) * 2^(1.0/12) * 1.2824^(-3) ] .* (x_out .^ (-0.25) )#- x_out .^(-2.25) ./ 64) 
 y_exact = 1.0 ./(4 .* x_out .^ 2 .- 1) .* x_exact
 print(z_exact)
 #print(ascend_left(ZI_fused⊗II_fused⊗II_fused, mera.layers[1]))
@@ -282,7 +282,7 @@ op6 = op2*op4
 
 ##Here, "adjust" shifts the C_z correlator before adding it to the z array. 
 ##Since the GS we calculated is not necessarily exact, we can 
-adjust = .00#010#9
+adjust = .00010#9
 for i in 0:10
     
     temp = __2PBinaryCorrelation(mera, i, op1, op2) - expect(op1, mera)^2 - adjust
